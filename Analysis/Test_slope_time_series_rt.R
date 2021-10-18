@@ -58,17 +58,21 @@ summary(m0)
 m1 <- lm(Anomaly ~ Year:Species,data = df.an.rt)
 summary(m1)
 confint(m1)
+tab_model(m1)
 #Mixed effects
 library(nlme)
 m2 <- lmer(Anomaly ~ Year+(0+Year|Species),data=df.an.rt)
 summary(m2)
 confint(m2)
-coef(m2)[1]
-rr1<- ranef(m2)
-dotplot.ranef.mer(rr1<- ranef(m2))
+coef(m2)[[1]]$Year
+rr1 <- ranef(m2)[[1]]+coef(m2)[[1]]$Year
+dotplot.ranef.mer(ranef(m2))
+plot(m2, Year ~ resid(., scaled=TRUE))
+plot(m2, resid(., scaled=TRUE) ~ fitted(.) | Species, abline = 0)
+
 
 p1 <- ggCaterpillar(ranef(m2, condVar=TRUE), QQ=FALSE, likeDotplot=TRUE)
-p1 <- p1 + mi.tema()
+p1
 library(sjPlot)
 tab_model(m2)
 tab_model(m2,show.re.var= FALSE)
@@ -104,7 +108,9 @@ ggCaterpillar <- function(re, QQ=TRUE, likeDotplot=TRUE) {
     p <- p + theme(legend.position="none")
     p <- p + geom_hline(yintercept=0)
     p <- p + geom_errorbar(aes(ymin=y-ci, ymax=y+ci), width=0, colour="black")
-    p <- p + geom_point(aes(size=1.2), colour="blue") 
+    p <- p + geom_point(aes(size=1.2), colour="blue")
+    #p <- p + theme(legend.position = "none")
+    p <- p + mi.tema()
     return(p)
   }
   
